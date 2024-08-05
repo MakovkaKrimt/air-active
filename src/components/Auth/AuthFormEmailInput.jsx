@@ -29,7 +29,7 @@ import AuthUseQueries from "../../services/auth/authUseQueries";
 
 const { TEXTS, HELPERS } = FORM_LABELS;
 
-export const AuthFormInput = ({ type }) => {
+export const AuthFormEmailInput = ({ type }) => {
   const {
     register,
     getFieldState,
@@ -38,9 +38,17 @@ export const AuthFormInput = ({ type }) => {
     formState: { isValid, errors },
   } = useFormContext();
   const { invalid, isDirty, error } = getFieldState(type);
-  const [showPassword, setShowPassword] = useState(false);
-  const handleMouseDownPassword = () => setShowPassword(!showPassword);
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const [isEmailAlreadyExists, setIsEmailAlreadyExists] = useState(false);
+  const currEmail = watch("email");
+  const isEmailExistsQuery = AuthUseQueries.useCheckEmail(
+    currEmail,
+    !invalid,
+    isDirty
+  );
+
+  if (isEmailExistsQuery.isError) {
+    console.log(isEmailExistsQuery.error);
+  }
 
   const handleReset = () => {
     resetField(type);
@@ -55,35 +63,9 @@ export const AuthFormInput = ({ type }) => {
     sx: {
       width: "100%",
     },
-  };
-
-  const txtProps = {
-    ...commonProps,
     InputProps: {
       endAdornment: (
         <InputAdornment position="end">
-          <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-          <IconButton aria-label="toggle reset input" onClick={handleReset}>
-            <ClearOutlinedIcon />
-          </IconButton>
-        </InputAdornment>
-      ),
-    },
-  };
-
-  const pwdProps = {
-    ...commonProps,
-    type: showPassword ? "text" : "password",
-    InputProps: {
-      endAdornment: (
-        <InputAdornment position="end">
-          <IconButton
-            aria-label="toggle password visibility"
-            onClick={handleClickShowPassword}
-            onMouseDown={handleMouseDownPassword}
-          >
-            {showPassword ? <Visibility /> : <VisibilityOff />}
-          </IconButton>
           <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
           <IconButton aria-label="toggle reset input" onClick={handleReset}>
             <ClearOutlinedIcon />
@@ -135,19 +117,21 @@ export const AuthFormInput = ({ type }) => {
             </Grid>
           )}
 
-          <LottieCheckedInput invalid={invalid} isDirty={isDirty} />
+          <LottieCheckedInput
+            invalid={invalid}
+            isDirty={isDirty}
+            exists={isEmailExistsQuery?.data?.data.emailExists || false}
+          />
         </Grid>
 
         {/* INPUT */}
 
         <Stack direction="column" gap={0.5}>
-          <TextField
-            {...(type.endsWith("password") ? pwdProps : txtProps)}
-          ></TextField>
+          <TextField {...commonProps}></TextField>
 
           {/* Error helper alerts */}
 
-          {invalid && (
+          {(invalid || isEmailExistsQuery?.data?.data.emailExists) && (
             <Fade in={true} timeout={400} mountOnEnter unmountOnExit>
               <Alert
                 variant="standard"
@@ -158,7 +142,7 @@ export const AuthFormInput = ({ type }) => {
                   wordWrap: "break-word",
                 }}
               >
-                {error.message}
+                {invalid ? error.message : FORM_LABELS.VALIDATION[type].EXISTS}
               </Alert>
             </Fade>
           )}

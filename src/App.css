@@ -1,35 +1,6 @@
 html,
 body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-
-divider {
-    position: relative;
-    border: none;
-    height: 2px;
-    background-color: #ccc;
-    /* Цвет линии hr */
-}
-
-divider::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 0;
-    background-color: #ff0000;
-    /* Цвет анимации */
-    animation: fillAnimation 2s forwards;
-    /* Название анимации и продолжительность */
-}
-
-@keyframes fillAnimation {
-    to {
-        width: 100%;
-        /* Заполнение до 100% ширины */
-    }
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
